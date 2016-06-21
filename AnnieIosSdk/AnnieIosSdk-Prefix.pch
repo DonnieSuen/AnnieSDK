@@ -1,0 +1,33 @@
+//
+//  AnnieIOSSDK-Prefix.pch
+//  AnnieIOSSDK
+//
+//  Created by jiangfeng on 16/4/7.
+//  Copyright (c) 2016年 anqu. All rights reserved.
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_3_0
+#warning "This project uses features only available in iOS SDK 3.0 and later."
+#endif
+
+#ifdef __OBJC__
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import "AnnieConfig.h"
+#endif
+
+
+#define SPACE_NOT_ENOUGH_ERROR -9999
+#define FILE_CHECK_FAILED_ERROR -9998
+
+
+#define  BUILD_STR(_FORMAT_,args...) ([NSString stringWithFormat:_FORMAT_, args])
+
+
+#ifndef __OPTIMIZE__
+#define NSLog(...) NSLog(__VA_ARGS__)
+#else
+#define NSLog(...) {}
+#endif
