@@ -28,7 +28,7 @@ int ddLogLevel;
  *  @param data post 请求参数
  */
 -(void)post:(NSString*)url argData:(NSString*)data {
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc]initWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:20];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc]initWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10];
     [request setHTTPMethod:@"POST"];
     //[request setValue:@"Content-Type" forHTTPHeaderField:@"application/json; charset=UTF-8"];
     [request setHTTPBody:[data dataUsingEncoding:NSUTF8StringEncoding]];//NSUTF8StringEncoding

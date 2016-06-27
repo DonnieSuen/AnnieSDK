@@ -33,6 +33,7 @@ static  NSString *recommendlink = @"recommendlink";
 static  NSString *delaytime = @"delaytime";
 
 static  NSString  *ExchOpen = @"1";
+static  NSString  *ExchClose = @"0";
 
 //初始化URL
 static const NSString *API_URL_Init = @"http://sdk.api-ag.com/init/?";

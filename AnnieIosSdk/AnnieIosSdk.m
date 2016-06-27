@@ -28,7 +28,7 @@
 
 @implementation AnnieIosSdk{
     NSMutableArray *data_recomm;
-    int *timetodelay;
+    int timetodelay;
     NSString *gotext;
     NSString *canceltxt;
     AdmobInterstitialViewController *intersview;
@@ -130,28 +130,37 @@ static  int ddLogLevel = LOG_FLAG_ERROR | LOG_FLAG_INFO;
 -(void)initsdk:(NSString*)bundleId Version:(NSString*)shortversion Time:(int)seconds
 {
     [self getAnalysisInfo];
+    [self umengTrack];
+    
     NSUserDefaults *defaults=[CommonUtils getNSUserContext];
-    NSString *isinited = [defaults objectForKey:isExchang];
+    NSString *isOpenRecommend = [defaults objectForKey:isExchang];
     
     timetodelay= seconds;
-    NSLog(@"_timetodelay：%d,",timetodelay);
-    
+
     //TODO
-    if ([isinited isEqualToString:ExchOpen]) { //已经初始化了
-        DDLogDebug(@"已经初始化了");
+    NSLog(@"isOpenRecommend:%@",isOpenRecommend);
+    if ([isOpenRecommend isEqualToString:ExchOpen]) { //已经初始化了
+        DDLogDebug(@"开评论了");
         [self topRecommend];
         
         if (timetodelay>0) {
             sleep(timetodelay);
            [self showEstimation];
-            
         }
         //激活成功，callback
         [_delegate initSdk:AnnInitSuccess];
         [self preloadIntersView];
-        [self umengTrack];
        return;
+    }else if([isOpenRecommend isEqualToString:ExchClose]){ //已经初始化了
+        //激活成功，callback
+        [_delegate initSdk:AnnInitSuccess];
+        [self preloadIntersView];
+        return;
+    }else{
+        //第一次进游戏
     }
+
+
     
     //网络未连接
     NSString *netConnection = [[Ann_HttpEngine shared_HttpEngine] getCurrentNet];
@@ -175,9 +184,6 @@ static  int ddLogLevel = LOG_FLAG_ERROR | LOG_FLAG_INFO;
         [defaults setObject:@"en" forKey:language];
     }
     
-//    UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-        UIViewController *rootViewController = [[[UIApplication sharedApplication] keyWindow] rootViewController];
-    // [rootViewController.view setBackgroundColor:[UIColor clearColor]];
     //设置loading
     
    // NSDictionary *dictionaryBundle = [[NSBundle mainBundle] infoDictionary];
@@ -207,42 +213,43 @@ static  int ddLogLevel = LOG_FLAG_ERROR | LOG_FLAG_INFO;
     SBJsonParser *parser = [[SBJsonParser alloc] init];
     NSDictionary *rootDic = [parser objectWithString:result];
     NSString *status = [[rootDic objectForKey:isExchang] stringValue];
+    NSLog(@"status:%@",status);
 //  NSLog(@"初始化isExchang = %@,ummengid=%@",status,[rootDic objectForKey:UmengID]);
-
-    if([status isEqualToString:ExchOpen]){ //开启 
-        NSArray *arr = [rootDic objectForKey:@"info"];
-       // NSLog(@"Init推荐 = %@",arr[0][@"link"]);
-       // [data_recomm removeAllObjects];
-        
-        //获取NSUserDefaults对象
-        NSUserDefaults *defaults=[CommonUtils getNSUserContext] ;
-        //保存数据
-        [defaults setObject:ExchOpen forKey:isExchang];
-        [defaults setObject:[rootDic objectForKey:UmengID] forKey:UmengID];
-        [defaults setObject:[rootDic objectForKey:admobBannerId] forKey:admobBannerId];
-        [defaults setObject:[rootDic objectForKey:admobIntereId] forKey:admobIntereId];
-        [defaults setObject:[rootDic objectForKey:appId] forKey:appId];
-        [defaults setObject:[rootDic objectForKey:moreLink] forKey:moreLink];
-        // 强制让数据立刻保存
-        [defaults synchronize];
-        
+    
+    NSArray *arr = [rootDic objectForKey:@"info"];
+    // NSLog(@"Init推荐 = %@",arr[0][@"link"]);
+    // [data_recomm removeAllObjects];
+    
+    //获取NSUserDefaults对象
+    NSUserDefaults *defaults=[CommonUtils getNSUserContext] ;
+    //保存数据
+    [defaults setObject:[[rootDic objectForKey:isExchang]stringValue] forKey:isExchang];
+    [defaults setObject:[rootDic objectForKey:UmengID] forKey:UmengID];
+    [defaults setObject:[rootDic objectForKey:admobBannerId] forKey:admobBannerId];
+    [defaults setObject:[rootDic objectForKey:admobIntereId] forKey:admobIntereId];
+    [defaults setObject:[rootDic objectForKey:appId] forKey:appId];
+    [defaults setObject:[rootDic objectForKey:moreLink] forKey:moreLink];
+    // 强制让数据立刻保存
+    [defaults synchronize];
+    
+    
+    if([status isEqualToString:ExchOpen]){ //开启弹窗
         sleep(2);
         [self setRecommParser:rootDic];
-        
         if (timetodelay>0) {
             sleep(timetodelay);
             [self showEstimation];
         }
-     
         //激活成功，callback
         [_delegate initSdk:AnnInitSuccess];
         [self preloadIntersView];
-        [self umengTrack];
-      
-    }else{  //未开启
-        [_delegate initSdk:AnnNoInit];
-        DDLogDebug(@"未初始化");
-        return;
+    }else if([status isEqualToString:ExchClose]){
+        NSLog(@"initcallback预加载");
+        //激活成功，callback
+        [_delegate initSdk:AnnInitSuccess];
+            NSUserDefaults *defaults=[CommonUtils getNSUserContext];
+        NSLog(@"!!!!!!%@",defaults);
+        [self preloadIntersView];
     }
 
 }
@@ -649,6 +656,7 @@ static  int ddLogLevel = LOG_FLAG_ERROR | LOG_FLAG_INFO;
 
 //    初始化预加载广告插屏
 -(void)preloadIntersView{
+    NSLog(@"preloadIntersView{");
     intersview = [[AdmobInterstitialViewController alloc] init];
     [intersview preloadRequest];
 }

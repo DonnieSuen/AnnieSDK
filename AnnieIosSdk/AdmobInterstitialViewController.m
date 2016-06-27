@@ -21,6 +21,7 @@
 #pragma Interstitial Delegate
 - (void)interstitial:(GADInterstitial *)interstitial
 didFailToReceiveAdWithError:(GADRequestError *)error {
+     NSLog(@"failReceiveAd:%@", [error localizedFailureReason]);
     
 }
 
